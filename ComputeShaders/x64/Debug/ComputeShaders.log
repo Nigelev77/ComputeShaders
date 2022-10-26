@@ -1,0 +1,3 @@
+﻿  main.cpp
+D:\dev\Proj\ComputeShaders\ComputeShaders\ComputeShaders\src\main.cpp(66,22): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  ComputeShaders.vcxproj -> D:\dev\Proj\ComputeShaders\ComputeShaders\x64\Debug\ComputeShaders.exe

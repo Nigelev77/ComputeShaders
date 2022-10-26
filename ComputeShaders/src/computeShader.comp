@@ -1,0 +1,60 @@
+#version 460 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(rgba8, binding = 0) uniform image2D img_input;
+layout(rgba8, binding = 1) uniform image2D img_output;
+
+const vec4 dead = vec4(1.0, 1.0, 1.0, 1.0);
+const vec4 alive = vec4(0.0, 0.0, 0.0, 1.0);
+
+int CheckNeighbour(ivec2 base_coord, int dx, int dy, ivec2 size)
+{
+	base_coord.x += dx;
+	if (base_coord.x<0 || base_coord.x>=size.x) return 0;
+	base_coord.y += dy;
+	if (base_coord.y<0 || base_coord.y>=size.y) return 0;
+	vec4 pixel = imageLoad(img_input, base_coord);
+	if (pixel.r == 0.0) return 1; //alive so increase pop count
+	return 0;
+}
+
+
+void main(void)
+{
+	ivec2 base_pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	ivec2 size = imageSize(img_input);
+	vec4 pixel = imageLoad(img_input, base_pixel_coords);
+	int count = 0;
+
+	//   1  2  3
+	//   4  x  5
+	//   6  7  8
+	count += CheckNeighbour(base_pixel_coords, -1, 1, size);
+	count += CheckNeighbour(base_pixel_coords, 0, 1, size);
+	count += CheckNeighbour(base_pixel_coords, 1, 1, size);
+	count += CheckNeighbour(base_pixel_coords, -1, 0, size);
+	count += CheckNeighbour(base_pixel_coords, 1, 0, size);
+	count += CheckNeighbour(base_pixel_coords, -1, -1, size);
+	count += CheckNeighbour(base_pixel_coords, 0, -1, size);
+	count += CheckNeighbour(base_pixel_coords, 1, -1, size);
+
+	if (pixel.r > 0.0) //if dead
+	{
+		if (count == 3)
+		{
+			imageStore(img_output, base_pixel_coords, alive);
+		}
+		else
+		{
+			imageStore(img_output, base_pixel_coords, dead);
+		}
+		return;
+	}
+	if (count < 2 || count>3)
+	{ 
+		imageStore(img_output, base_pixel_coords, dead);
+	}
+	else
+	{
+		imageStore(img_output, base_pixel_coords, alive);
+	}
+}
